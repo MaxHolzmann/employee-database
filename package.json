@@ -1,0 +1,23 @@
+{
+  "name": "module12",
+  "version": "1.0.0",
+  "description": "## Demonstration",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MaxHolzmann/module12.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MaxHolzmann/module12/issues"
+  },
+  "homepage": "https://github.com/MaxHolzmann/module12#readme",
+  "dependencies": {
+    "inquirer": "^9.1.4",
+    "mysql2": "^3.0.1"
+  }
+}
