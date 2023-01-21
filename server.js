@@ -6,7 +6,6 @@ const cTable = require('console.table');
 
 /* 
 TODO:
-make functions to display updates to table.
 add manager to employee?
 add comments
 */
@@ -85,42 +84,55 @@ const updateEmployee = [{
     type: "input"
     }]
 
+
+const showDepartments = () => {
+    db.query('SELECT * FROM department', (error, results, fields) => {
+        if(error) throw error;
+        console.table(results)
+        continuePrompt();
+    });
+}
+
+const showRoles = () => {
+    db.query('SELECT * FROM role', (error, results, fields) => {
+        if(error) throw error;
+        console.table(results)
+        continuePrompt();
+    });
+}
+
+const showEmployees = () => {
+    db.query('SELECT * FROM employee', (error, results, fields) => {
+        if(error) throw error;
+        console.table(results)
+        continuePrompt();
+    });
+}
+
 const continuePrompt = () => {
     inquirer.prompt(endQuestions)
     .then(answers => {
         if(answers.continue === "Continue") {
-            prompt();
+            init();
         } else {
-            console.log('Done!')
+            process.exit();
         }
     })
 }
 
-const prompt = () => {
+const init = () => {
     inquirer.prompt(questions)
 .then(answers => {
    if(answers.select === "View All Departments") {
-        db.query('SELECT * FROM department', (error, results, fields) => {
-        if(error) throw error;
-        console.table(results)
-        continuePrompt();
-    });
+        showDepartments();
     }
 
     if(answers.select === "View All Roles") {
-        db.query('SELECT * FROM role', (error, results, fields) => {
-        if(error) throw error;
-        console.table(results)
-        continuePrompt();
-    });
+        showRoles();
     }
 
     if(answers.select === "View All Employees") {
-        db.query('SELECT * FROM employee', (error, results, fields) => {
-        if(error) throw error;
-        console.table(results)
-        continuePrompt();
-    });
+        showEmployees();
     }
 
     if(answers.select === "Add A Department") {
@@ -129,7 +141,7 @@ const prompt = () => {
              db.query('INSERT INTO department (department_name) VALUES ("' + answers.department_name +'")', (err, result, fields) => {
                 if (err) throw err;
                 console.log(answers.department_name + "added to the database.");
-                continuePrompt();
+                showDepartments();
             });
         })
     }
@@ -140,8 +152,7 @@ const prompt = () => {
             db.query('INSERT INTO role (title, salary, department_id) VALUES ("' + answers.roleName + '", ' + answers.roleSalary + ', (SELECT dep_id FROM department where department_name="' + answers.role_department + '"))', (error, result, fields) => {
                 if (error) throw error;
                 console.log(answers.roleName + ' has been added!');
-                console.table(result)
-                continuePrompt();
+                showRoles();
             });
         })
     }
@@ -152,8 +163,7 @@ const prompt = () => {
             db.query('INSERT INTO employee (first_name, last_name, role_id) VALUES ("' + answers.employFirstName + '", "' + answers.employLastName + '", (SELECT id FROM role WHERE title="' + answers.employRole +'"))', (error, result, fields) => {
                 if (error) throw error;
                 console.log(answers.employFirstName + " was added!");
-                console.table(result)
-                continuePrompt();
+                showEmployees();
             })
         })
     }
@@ -163,8 +173,7 @@ const prompt = () => {
         .then(answers => {
             db.query('UPDATE employee SET role_id = ' + answers.newRole + ' WHERE id = ' + answers.employId + ';', (error, result, fields) => {
                 if(error) throw error;
-                console.log('Role updated!')
-                continuePrompt();
+                showEmployees();
             })
         })
     }
@@ -172,6 +181,6 @@ const prompt = () => {
 });
 }
 
-prompt();
+init();
 
 
