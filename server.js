@@ -6,10 +6,10 @@ const cTable = require('console.table');
 
 /* 
 TODO:
-add manager to employee?
-add comments
+add manager to employee
 */
 
+//mysql database connection
 const db = mysql.createConnection({
         host: 'localhost',
        user: process.env.DBUSER,
@@ -17,6 +17,7 @@ const db = mysql.createConnection({
        database: 'business_db'
 });
 
+//questions for initial prompt
 const questions = [{
     name: "select",
     message: "Select an option!",
@@ -85,6 +86,7 @@ const updateEmployee = [{
     }]
 
 
+//show all contents of department table
 const showDepartments = () => {
     db.query('SELECT * FROM department', (error, results, fields) => {
         if(error) throw error;
@@ -93,6 +95,7 @@ const showDepartments = () => {
     });
 }
 
+//show all contents of role table
 const showRoles = () => {
     db.query('SELECT * FROM role', (error, results, fields) => {
         if(error) throw error;
@@ -101,6 +104,7 @@ const showRoles = () => {
     });
 }
 
+//show all contents of employee table
 const showEmployees = () => {
     db.query('SELECT * FROM employee', (error, results, fields) => {
         if(error) throw error;
@@ -109,6 +113,7 @@ const showEmployees = () => {
     });
 }
 
+//prompt to quit or continue
 const continuePrompt = () => {
     inquirer.prompt(endQuestions)
     .then(answers => {
@@ -120,6 +125,7 @@ const continuePrompt = () => {
     })
 }
 
+//initial prompt
 const init = () => {
     inquirer.prompt(questions)
 .then(answers => {
