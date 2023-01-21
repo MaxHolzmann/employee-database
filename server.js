@@ -1,0 +1,177 @@
+require('dotenv').config();
+const mysql = require('mysql2');
+const inquirer = require('inquirer');
+const cTable = require('console.table');
+
+
+/* 
+TODO:
+make functions to display updates to table.
+add manager to employee?
+add comments
+*/
+
+const db = mysql.createConnection({
+        host: 'localhost',
+       user: process.env.DBUSER,
+       password: process.env.DBPASS,
+       database: 'business_db'
+});
+
+const questions = [{
+    name: "select",
+    message: "Select an option!",
+    type: "list",
+    choices: ["View All Departments",
+                "View All Roles",
+                "View All Employees",
+                "Add A Department",
+                "Add A Role",
+                "Add An Employee",
+                "Update An Employee Role"]
+}
+]
+
+const endQuestions = [{
+    name: "continue",
+    message: "Continue or Quit?",
+    type: "list",
+    choices: ["Continue", "Quit"]
+}]
+
+const departmentName = [{
+    name: "department_name",
+    message: "Enter your new department name",
+    type: "input"
+}]
+
+const addRoleQuestions = [{
+    name: "roleName",
+    message: "What is the name of your new role?",
+    type: "input"
+    }, {
+    name: "roleSalary",
+    message: "How much money does your new role make in one year?",
+    type: "input"
+    }, {
+    name: "role_department",
+    message: "Which department does your new role belong to? Beware, if you did not create the department it may cause errors.",
+    type: "input"
+    }
+    ]
+
+const addEmployeeQuestions = [{
+        name: "employFirstName",
+        message: "What is the first name of your new employee?",
+        type: "input"
+        }, {
+        name: "employLastName",
+        message: "What is the last name of your new employee?",
+        type: "input"
+        }, {
+        name: "employRole",
+        message: "What role is your new employee? (Make sure that the role exists)",
+        type: "input"
+        }
+    ]
+
+const updateEmployee = [{
+    name: "employId",
+    message: "What is the ID of the employee you want to update?",
+    type: "input"
+    }, {
+    name: "newRole",
+    message: "What is the ID of their new role?",
+    type: "input"
+    }]
+
+const continuePrompt = () => {
+    inquirer.prompt(endQuestions)
+    .then(answers => {
+        if(answers.continue === "Continue") {
+            prompt();
+        } else {
+            console.log('Done!')
+        }
+    })
+}
+
+const prompt = () => {
+    inquirer.prompt(questions)
+.then(answers => {
+   if(answers.select === "View All Departments") {
+        db.query('SELECT * FROM department', (error, results, fields) => {
+        if(error) throw error;
+        console.table(results)
+        continuePrompt();
+    });
+    }
+
+    if(answers.select === "View All Roles") {
+        db.query('SELECT * FROM role', (error, results, fields) => {
+        if(error) throw error;
+        console.table(results)
+        continuePrompt();
+    });
+    }
+
+    if(answers.select === "View All Employees") {
+        db.query('SELECT * FROM employee', (error, results, fields) => {
+        if(error) throw error;
+        console.table(results)
+        continuePrompt();
+    });
+    }
+
+    if(answers.select === "Add A Department") {
+        inquirer.prompt(departmentName)
+        .then(answers => {
+             db.query('INSERT INTO department (department_name) VALUES ("' + answers.department_name +'")', (err, result, fields) => {
+                if (err) throw err;
+                console.log(answers.department_name + "added to the database.");
+                continuePrompt();
+            });
+        })
+    }
+
+    if(answers.select === "Add A Role") {
+        inquirer.prompt(addRoleQuestions)
+        .then(answers => {
+            db.query('INSERT INTO role (title, salary, department_id) VALUES ("' + answers.roleName + '", ' + answers.roleSalary + ', (SELECT dep_id FROM department where department_name="' + answers.role_department + '"))', (error, result, fields) => {
+                if (error) throw error;
+                console.log(answers.roleName + ' has been added!');
+                console.table(result)
+                continuePrompt();
+            });
+        })
+    }
+
+    if(answers.select === "Add An Employee") {
+        inquirer.prompt(addEmployeeQuestions)
+        .then(answers => {
+            db.query('INSERT INTO employee (first_name, last_name, role_id) VALUES ("' + answers.employFirstName + '", "' + answers.employLastName + '", (SELECT id FROM role WHERE title="' + answers.employRole +'"))', (error, result, fields) => {
+                if (error) throw error;
+                console.log(answers.employFirstName + " was added!");
+                console.table(result)
+                continuePrompt();
+            })
+        })
+    }
+
+    if(answers.select === "Update An Employee Role") {
+        inquirer.prompt(updateEmployee)
+        .then(answers => {
+            db.query('UPDATE employee SET role_id = ' + answers.newRole + ' WHERE id = ' + answers.employId + ';', (error, result, fields) => {
+                if(error) throw error;
+                console.log('Role updated!')
+                continuePrompt();
+            })
+        })
+    }
+
+});
+}
+
+prompt();
+
+
